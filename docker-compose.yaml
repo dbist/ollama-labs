@@ -1,52 +1,88 @@
+networks:
+  ollama_network:
+    driver: bridge
+
 services:
   ollama:
     image: ollama/ollama
     container_name: ollama
     hostname: ollama
-    restart: always
+    restart: unless-stopped
+    networks:
+      - ollama_network
     ports:
-      - "127.0.0.1:11434:11434"
+      - "${OLLAMA_PORT}:11434"
     entrypoint: ["ollama", "serve"]
     volumes:
       - ./models/:/models
       - ollama_data:/root/.ollama
     environment:
-      - OLLAMA_KEEP_ALIVE=24h
-      - OLLAMA_NUM_THREADS=4      # limit CPU usage, keep host responsive
-      - OLLAMA_MAX_CTX=2048       # small context window reduces chance of long unsafe runs
-      - OLLAMA_DISABLE_WHITELIST=0  # we'll add our own whitelist (see 4)
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}
+      - OLLAMA_NUM_THREADS=${OLLAMA_NUM_THREADS}
+      - OLLAMA_MAX_CTX=${OLLAMA_MAX_CTX}
+      - OLLAMA_DISABLE_WHITELIST=${OLLAMA_DISABLE_WHITELIST}
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: 4g
+          cpus: '${OLLAMA_CPUS}'
+          memory: ${OLLAMA_MEMORY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
-    restart: always
+    restart: unless-stopped
+    networks:
+      - ollama_network
     ports:
-      - "8282:8080"
+      - "${WEBUI_PORT}:8080"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
       - open-webui:/app/backend/data
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     environment:
-      - OLLAMA_API_BASE_URL=http://host.docker.internal:11434/api   
+      - OLLAMA_API_BASE_URL=${WEBUI_OLLAMA_API_BASE_URL}
+    deploy:
+      resources:
+        limits:
+          cpus: '${WEBUI_CPUS}'
+          memory: ${WEBUI_MEMORY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: always
+    restart: unless-stopped
+    networks:
+      - ollama_network
     ports:
-      - "80:80"
+      - "${NGINX_PORT}:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - ollama
-      - open-webui
+      ollama:
+        condition: service_healthy
+      open-webui:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 volumes:
   ollama_data:

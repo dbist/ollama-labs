@@ -1,0 +1,39 @@
+# Git
+.git
+.gitattributes
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Pre-commit
+.pre-commit-config.yaml
+.pre-commit-hooks.yaml
+
+# Temporary files
+*.tmp
+*.log
+*.pid
+
+# OS specific
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Python cache (if applicable)
+__pycache__/
+*.pyc
