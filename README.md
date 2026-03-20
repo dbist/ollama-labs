@@ -83,7 +83,7 @@ Reverse proxy for unified access.
 
 ```bash
 # Pull a model
-docker exec -it ollama ollama pull mistral:7b
+docker exec -it ollama ollama phi3:3.8b
 
 # List available models
 docker exec -it ollama ollama list
