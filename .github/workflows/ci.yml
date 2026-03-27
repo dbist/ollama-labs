@@ -10,6 +10,20 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     name: Validate Configuration
+    env:
+      OLLAMA_KEEP_ALIVE=24h
+      OLLAMA_NUM_THREADS=4
+      OLLAMA_MAX_CTX=2048
+      OLLAMA_DISABLE_WHITELIST=false
+      NGINX_PORT=80
+      OLLAMA_CPUS='2.0'
+      OLLAMA_MEMORY=4g
+      WEBUI_CPUS=1.0
+      WEBUI_MEMORY=1g
+      OLLAMA_API_BASE_URL=http://ollama:11434/api
+
+      NGINX_WORKER_PROCESSES=1
+      NGINX_WORKER_CONNECTIONS=1024
 
     steps:
       - name: Checkout code
