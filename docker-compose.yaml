@@ -5,29 +5,21 @@ services:
     hostname: ollama
     restart: always
     ports:
-      - "127.0.0.1:11437:11434"
+      - "127.0.0.1:11436:11434"
     entrypoint: ["ollama", "serve"]
     volumes:
       - ./models/:/models
       - ollama_data:/root/.ollama
     environment:
-      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}  # keep model loaded in memory for faster response, set to false to disable
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}  # keep models loaded in memory for faster response
       - OLLAMA_NUM_THREADS=${OLLAMA_NUM_THREADS}      # limit CPU usage, keep host responsive
       - OLLAMA_MAX_CTX=${OLLAMA_MAX_CTX}       # small context window reduces chance of long unsafe runs
-      - OLLAMA_DISABLE_WHITELIST=${OLLAMA_DISABLE_WHITELIST}  # disable whitelist for easier access, set to false to enable
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - OLLAMA_DISABLE_WHITELIST=${OLLAMA_DISABLE_WHITELIST}  # we'll add our own whitelist (see 4)
     deploy:
       resources:
         limits:
-          cpus: ${OLLAMA_CPUS}
+          cpus: ${OLLAMA_CPUS}  # limit to 2 CPU cores by default
           memory: ${OLLAMA_MEMORY}
-    networks:
-      - ollama-net
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:0.8.12
@@ -38,18 +30,9 @@ services:
     volumes:
       - open-webui:/app/backend/data
     depends_on:
-      ollama:
-        condition: service_healthy
+      - ollama
     environment:
       - OLLAMA_API_BASE_URL=${OLLAMA_API_BASE_URL}
-    networks:
-      - ollama-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 60s
 
   nginx:
     image: nginx:1.29.7-alpine-slim
@@ -62,13 +45,12 @@ services:
     depends_on:
       - ollama
       - open-webui
-    networks:
-      - ollama-net
 
 volumes:
   ollama_data:
   open-webui:
 
 networks:
-  ollama-net:
+  default:
+    name: ollama-network
     driver: bridge
