@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Compose
-        uses: docker/setup-docker-action@v3
+        uses: docker/setup-docker-action@v5
 
       - name: Validate docker-compose syntax
         run: docker compose config
