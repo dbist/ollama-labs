@@ -151,3 +151,109 @@ See [child-safe.md](child-safe.md) for guidance on making Ollama safe for childr
 - **nginx.conf** - Reverse proxy routing with rate limiting
 - **models.json** - Available models metadata
 - **models.md** - Model recommendations and performance notes
+
+
+## Intel N100 / CPU-Only Systems (e.g., Pinova P1 Mini)
+
+If you're running on a **Pinova P1 Mini** or similar Intel N100/Celeron system without a dedicated GPU, Ollama will run in CPU mode. You'll see this in the logs:
+
+```
+inference compute id=cpu library=cpu compute="" name=cpu description=cpu
+```
+
+This is expected behavior. To optimize performance on CPU-only systems:
+
+| Option | Description | How To |
+|--------|-------------|--------|
+| **Use smaller models** | Models with fewer parameters run faster on CPU | `ollama pull phi3:mini`, `gemma:2b`, `tinyllama:1.1b` |
+| **Increase CPU threads** | Utilize all available CPU cores | Set `OLLAMA_NUM_THREADS=4` in `.env` (match your core count) |
+| **Use quantized models** | 4-bit quantization reduces memory and speeds up inference | `ollama pull llama3:8b-q4_0`, `mistral:7b-q4_0` |
+| **Reduce context window** | Smaller context = less RAM usage per request | Set `OLLAMA_MAX_CTX=2048` in `.env` |
+| **Add swap space** | Prevents OOM errors on 8GB systems | `sudo fallocate -l 2G /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
+
+### Recommended Models for Intel N100
+
+| Model | Size | Speed | Best For |
+|-------|------|-------|----------|
+| `phi3:mini` | 3.8B | ⚡⚡⚡ Fast | Chat, quick Q&A |
+| `gemma:2b` | 2B | ⚡⚡⚡⚡ Very Fast | Simple tasks, classification |
+| `tinyllama:1.1b` | 1.1B | ⚡⚡⚡⚡⚡ Fastest | Ultra-light demos |
+| `llama3:8b-q4_0` | 8B | ⚡⚡ Moderate | Better quality, slower |
+| `mistral:7b-q4_0` | 7B | ⚡⚡ Moderate | Good balance |
+
+### Expected Performance on Intel N100
+
+| Model | Tokens/Second | First Token Latency |
+|-------|---------------|---------------------|
+| `phi3:mini` | 5-8 t/s | ~2-3 seconds |
+| `gemma:2b` | 8-12 t/s | ~1-2 seconds |
+| `llama3:8b-q4_0` | 2-4 t/s | ~5-8 seconds |
+
+> 💡 **Tip:** CPU inference is perfectly usable for chat and Q&A. Expect 2-5 tokens/second for 7-8B models. For faster responses, stick to models under 4B parameters.
+
+### Troubleshooting CPU Mode
+
+If you have an NVIDIA GPU but still see CPU inference:
+
+1. **Install NVIDIA Container Toolkit:** See [GPU Support](#gpu-support) section
+2. **Verify GPU detection:** `docker exec ollama nvidia-smi`
+3. **Restart container:** `docker compose down && docker compose up -d`
+4. **Check logs:** `docker logs ollama | grep -i gpu`
+```
+
+---
+
+## Quick Command to Add It
+
+If you have terminal access, run this from the `ollama-labs` directory:
+
+```bash
+cat >> README.md << 'EOF'
+
+## Intel N100 / CPU-Only Systems (e.g., Pinova P1 Mini)
+
+If you're running on a **Pinova P1 Mini** or similar Intel N100/Celeron system without a dedicated GPU, Ollama will run in CPU mode. You'll see this in the logs:
+
+```
+inference compute id=cpu library=cpu compute="" name=cpu description=cpu
+```
+
+This is expected behavior. To optimize performance on CPU-only systems:
+
+| Option | Description | How To |
+|--------|-------------|--------|
+| **Use smaller models** | Models with fewer parameters run faster on CPU | `ollama pull phi3:mini`, `gemma:2b`, `tinyllama:1.1b` |
+| **Increase CPU threads** | Utilize all available CPU cores | Set `OLLAMA_NUM_THREADS=4` in `.env` (match your core count) |
+| **Use quantized models** | 4-bit quantization reduces memory and speeds up inference | `ollama pull llama3:8b-q4_0`, `mistral:7b-q4_0` |
+| **Reduce context window** | Smaller context = less RAM usage per request | Set `OLLAMA_MAX_CTX=2048` in `.env` |
+| **Add swap space** | Prevents OOM errors on 8GB systems | `sudo fallocate -l 2G /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
+
+### Recommended Models for Intel N100
+
+| Model | Size | Speed | Best For |
+|-------|------|-------|----------|
+| `phi3:mini` | 3.8B | ⚡⚡⚡ Fast | Chat, quick Q&A |
+| `gemma:2b` | 2B | ⚡⚡⚡⚡ Very Fast | Simple tasks, classification |
+| `tinyllama:1.1b` | 1.1B | ⚡⚡⚡⚡⚡ Fastest | Ultra-light demos |
+| `llama3:8b-q4_0` | 8B | ⚡⚡ Moderate | Better quality, slower |
+| `mistral:7b-q4_0` | 7B | ⚡⚡ Moderate | Good balance |
+
+### Expected Performance on Intel N100
+
+| Model | Tokens/Second | First Token Latency |
+|-------|---------------|---------------------|
+| `phi3:mini` | 5-8 t/s | ~2-3 seconds |
+| `gemma:2b` | 8-12 t/s | ~1-2 seconds |
+| `llama3:8b-q4_0` | 2-4 t/s | ~5-8 seconds |
+
+> 💡 **Tip:** CPU inference is perfectly usable for chat and Q&A. Expect 2-5 tokens/second for 7-8B models. For faster responses, stick to models under 4B parameters.
+
+### Troubleshooting CPU Mode
+
+If you have an NVIDIA GPU but still see CPU inference:
+
+1. **Install NVIDIA Container Toolkit:** See [GPU Support](#gpu-support) section
+2. **Verify GPU detection:** `docker exec ollama nvidia-smi`
+3. **Restart container:** `docker compose down && docker compose up -d`
+4. **Check logs:** `docker logs ollama | grep -i gpu`
+EOF

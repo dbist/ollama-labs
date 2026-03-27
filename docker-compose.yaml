@@ -5,27 +5,27 @@ services:
     hostname: ollama
     restart: always
     ports:
-      - "127.0.0.1:11436:11434"
+      - "127.0.0.1:11437:11434"
     entrypoint: ["ollama", "serve"]
     volumes:
       - ./models/:/models
       - ollama_data:/root/.ollama
     environment:
-      - OLLAMA_KEEP_ALIVE=24h
-      - OLLAMA_NUM_THREADS=4      # limit CPU usage, keep host responsive
-      - OLLAMA_MAX_CTX=2048       # small context window reduces chance of long unsafe runs
-      - OLLAMA_DISABLE_WHITELIST=false
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE}  # keep model loaded in memory for faster response, set to false to disable
+      - OLLAMA_NUM_THREADS=${OLLAMA_NUM_THREADS}      # limit CPU usage, keep host responsive
+      - OLLAMA_MAX_CTX=${OLLAMA_MAX_CTX}       # small context window reduces chance of long unsafe runs
+      - OLLAMA_DISABLE_WHITELIST=${OLLAMA_DISABLE_WHITELIST}  # disable whitelist for easier access, set to false to enable
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-#      start_period: 30s
+      start_period: 30s
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: 4g
+          cpus: ${OLLAMA_CPUS}
+          memory: ${OLLAMA_MEMORY}
     networks:
       - ollama-net
 
