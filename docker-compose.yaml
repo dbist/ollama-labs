@@ -14,7 +14,13 @@ services:
       - OLLAMA_KEEP_ALIVE=24h
       - OLLAMA_NUM_THREADS=4      # limit CPU usage, keep host responsive
       - OLLAMA_MAX_CTX=2048       # small context window reduces chance of long unsafe runs
-      - OLLAMA_DISABLE_WHITELIST=0  # we'll add our own whitelist (see 4)
+      - OLLAMA_DISABLE_WHITELIST=false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+#      start_period: 30s
     deploy:
       resources:
         limits:
@@ -32,14 +38,21 @@ services:
     volumes:
       - open-webui:/app/backend/data
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     environment:
       - OLLAMA_API_BASE_URL=${OLLAMA_API_BASE_URL}
     networks:
       - ollama-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
   
   nginx:
-    image: nginx:latest
+    image: nginx:1.29.7-alpine-slim
     container_name: nginx
     restart: always
     ports:
