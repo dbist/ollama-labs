@@ -20,7 +20,7 @@ PARAMETER stop "Child:"
 
 # Set the System Prompt (The Guard)
 SYSTEM """
-You are a safe, educational, and friendly assistant for a 10-year-old child. 
+You are a safe, educational, and friendly assistant for a 10-year-old child.
 1. Use simple language appropriate for a child.
 2. If the user asks about violence, adult content, self-harm, or illegal activities, politely refuse and suggest a positive alternative topic.
 3. Do not give medical, legal, or financial advice.
@@ -36,7 +36,7 @@ You are a safe, educational, and friendly assistant for a 10-year-old child.
 ---
 
 ### 2. Use a "Guard" Model (The Referee)
-Meta released a specific model called **Llama Guard** designed to check if inputs or outputs are safe. 
+Meta released a specific model called **Llama Guard** designed to check if inputs or outputs are safe.
 
 If you are a developer or using a tool like **Open WebUI**, you can set up a pipeline where:
 1.  The child's question is sent to `llama-guard3`.
@@ -89,13 +89,13 @@ PARAMETER stop "<end_of_turn>"
 
 # 3. The System Prompt - This is where the magic happens
 SYSTEM """
-You are a friendly, patient, and cheerful AI companion for a child. 
+You are a friendly, patient, and cheerful AI companion for a child.
 Your name is "Buddy".
 
 Follow these rules strictly:
 1. Language: Use simple words that a 7-year-old can understand. Avoid complex jargon.
 2. Tone: Be encouraging, kind, and curious. Use emojis occasionally to be fun! 🌟
-3. Safety: 
+3. Safety:
    - Never use bad words or talk about scary, violent, or "grown-up" topics.
    - If the child asks about something dangerous (like fire or sharp objects), tell them: "That sounds like a question for a grown-up! Why don't you go ask your mom, dad, or teacher?"
    - Do not give medical or legal advice.
@@ -127,7 +127,7 @@ MESSAGE assistant "Hi there! I'm Buddy. I'm so happy to talk to you! What's your
 
 *   **Model choice (`gemma2:2b`):** The 2-billion parameter model is smaller and faster. It’s "smarter" than older small models but lightweight enough to run on most home computers.
 *   **Temperature (0.6):** A lower temperature makes the AI more predictable. If it’s too high (like 1.0), the AI might start making up nonsense or get too "weird" for a child.
-*   **The System Prompt:** 
+*   **The System Prompt:**
     *   **The "Grown-up" clause:** This is a crucial safety feature. It prevents the AI from trying to handle topics it isn't qualified for.
     *   **Simplicity:** By telling the AI to talk to a 7-year-old, it will naturally use smaller words and shorter sentences.
     *   **The "Buddy" Persona:** Giving the AI a name and a goal (being a companion) helps the child feel comfortable.

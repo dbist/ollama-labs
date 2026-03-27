@@ -50,7 +50,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 60s
-  
+
   nginx:
     image: nginx:1.29.7-alpine-slim
     container_name: nginx

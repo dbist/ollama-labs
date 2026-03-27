@@ -10,17 +10,17 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     name: Validate Configuration
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Docker Compose
         uses: docker/setup-docker-action@v3
-      
+
       - name: Validate docker-compose syntax
         run: docker compose config
-      
+
       - name: Install pre-commit
         run: |
           pip install pre-commit
