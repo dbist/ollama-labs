@@ -20,6 +20,8 @@ services:
         limits:
           cpus: '2.0'
           memory: 4g
+    networks:
+      - ollama-net
 
   open-webui:
     image: ghcr.io/open-webui/open-webui:0.8.12
@@ -32,20 +34,28 @@ services:
     depends_on:
       - ollama
     environment:
-      - OLLAMA_API_BASE_URL=http://ollama:11434/api
+      - OLLAMA_API_BASE_URL=${OLLAMA_API_BASE_URL}
+    networks:
+      - ollama-net
   
-  #nginx:
-  #  image: nginx:latest
-  #  container_name: nginx
-  #  restart: always
-  #  ports:
-  #    - "80:80"
-  #  volumes:
-  #    - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #  depends_on:
-  #    - ollama
-  #    - open-webui
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - ollama
+      - open-webui
+    networks:
+      - ollama-net
 
 volumes:
   ollama_data:
   open-webui:
+
+networks:
+  ollama-net:
+    driver: bridge
