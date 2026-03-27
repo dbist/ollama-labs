@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Compose
-        uses: docker/setup-docker-action@v3
+        uses: docker/setup-docker-action@v5
 
       - name: Validate docker-compose syntax
         run: docker compose config
